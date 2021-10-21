@@ -1,0 +1,24 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: placement-binding
+  annotations:
+    apps.open-cluster-management.io/reconcile-option: replace
+placementRef:
+  name: dev-placement-rule
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+- name: dev-policy-etcdencryption
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+- name: dev-policy-gatekeeper-operator
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+- name: dev-policy-gatekeeper-config-exclude-namespaces
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+- name: dev-policy-gatekeeper-namespace-denyannotation
+  kind: Policy
+  apiGroup: policy.open-cluster-management.io
+

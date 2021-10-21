@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - placement-binding.yml
+  - placement-rules.yml
+  - SC-System-and-Communications-Protection/policy-etcdencryption.yaml
+  - CM-Configuration-Management/policy-gatekeeper-config-exclude-namespaces.yaml
+  - CM-Configuration-Management/policy-gatekeeper-k8snamespaceannotationdeny.yml
+  - CM-Configuration-Management/policy-gatekeeper-operator.yaml

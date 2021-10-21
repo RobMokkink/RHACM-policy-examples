@@ -1,0 +1,85 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-gatekeeper-namespace-denyannotation
+  annotations:
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+    policy.open-cluster-management.io/categories: CM Configuration Management
+    policy.open-cluster-management.io/controls: CM-2 Baseline Configuration
+    apps.open-cluster-management.io/reconcile-option: replace
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1 
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-gatekeeper-namespace-denyannotion-constrainttemplate
+          annotations:
+            apps.open-cluster-management.io/reconcile-option: replace
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: templates.gatekeeper.sh/v1beta1
+                kind: ConstraintTemplate
+                metadata:
+                  name: k8snamespaceannotationdeny
+                spec:
+                  crd:
+                    spec:
+                      names:
+                        kind: K8sNamespaceAnnotationDeny
+                      validation:
+                        # Schema for the `parameters` field
+                        openAPIV3Schema:
+                          properties:
+                            annotations:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  key:
+                                    type: string
+                                  value:
+                                    type: string
+                  targets:
+                    - target: admission.k8s.gatekeeper.sh
+                      rego: |
+                        package k8snamespaceannotationdeny
+                        violation[{"msg": msg}] {
+                          value := input.review.object.metadata.annotations[key]
+                          denyval := input.parameters.annotations[_]
+                          denyval.key == key
+                          value == denyval.value
+                          msg := sprintf("Annotation <%v: %v> is not allowed!", [key, value])
+                        }
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: policy-gatekeeper-namespace-denyannotion-constraint
+          annotations:
+            apps.open-cluster-management.io/reconcile-option: replace
+        spec:
+          remediationAction: inform
+          severity: low
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: constraints.gatekeeper.sh/v1beta1
+                kind: K8sNamespaceAnnotationDeny
+                metadata:
+                  name: no-empty-nodeselector
+                spec:
+                  match:
+                    kinds:
+                      - apiGroups: [""]
+                        kinds: ["Namespace"]
+                  parameters:
+                    annotations:
+                      - key: "openshift.io/node-selector"
+                        value: ''
