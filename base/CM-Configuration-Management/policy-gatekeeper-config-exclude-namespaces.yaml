@@ -30,7 +30,6 @@ spec:
                   match:
                     - excludedNamespaces:
                         - ansible-automation-platform
-                        - belastingdienst
                         - default
                         - hive
                         - kube-node-lease
